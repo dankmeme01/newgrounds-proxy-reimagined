@@ -1,6 +1,6 @@
 {
 	"geode": "3.0.0-alpha.1",
-	"version": "v2.0.1",
+	"version": "v2.0.2",
 	"id": "relative.newgrounds_proxy",
 	"name": "Newgrounds Proxy",
 	"developer": "relative",
@@ -11,6 +11,7 @@
 	},
 	"repository": "https://github.com/relativemodder/newgrounds-proxy",
 	"issues": {
+		"info": "discord",
 		"url": "https://discord.gg/xxPJpkAtBx"
 	}
 }
