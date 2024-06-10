@@ -37,6 +37,8 @@ jobs:
         with:
           combine: true
           sdk: nightly
+          bindings: SpaghettDev/bindings
+          bindings-ref: cchttpidk
           target: ${{ matrix.config.target }}
       
   package:
