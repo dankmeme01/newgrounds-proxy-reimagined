@@ -7,7 +7,8 @@
 	"description": "Tries to apply Cloudflare's cache while downloading songs from Newgrounds via self-hosted server.",
 	"gd": {
 		"android": "*",
-		"win": "2.206"
+		"win": "2.206",
+		"mac": "2.206"
 	},
 	"repository": "https://github.com/relativemodder/newgrounds-proxy",
 	"issues": {
