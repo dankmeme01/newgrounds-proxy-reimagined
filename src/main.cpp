@@ -1,36 +1,6 @@
 #include <Geode/Geode.hpp>
-#include <Geode/utils/web.hpp>
-#include <Geode/modify/LevelInfoLayer.hpp>
 
 using namespace geode::prelude;
-
-
-class $modify(ProxyLevelInfoLayer, LevelInfoLayer) {
-	bool init(GJGameLevel* level, bool smth) {
-		if (!LevelInfoLayer::init(level, smth)) return false;
-
-		web::AsyncWebRequest()
-			.fetch("https://check.auby.pro")
-			.text()
-			.then([](std::string const& result) {
-				log::debug("Proxy OK");
-				/*
-				Notification::create(
-					std::string("Newgrounds Proxy OK"), 
-					CCSprite::createWithSpriteFrameName("GJ_completesIcon_001.png")
-				)->show();*/
-			})
-			.expect([](std::string const& error) {
-				log::error("Proxy ERROR: {}", error);
-				Notification::create(
-					std::string("Newgrounds Proxy Error: ") + error, 
-					CCSprite::createWithSpriteFrameName("GJ_deleteIcon_001.png")
-				)->show();
-			});
-
-		return true;
-	}
-};
 
 
 std::string str_replace(std::string haystack, std::string needle, std::string replacement) {
