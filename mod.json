@@ -9,5 +9,6 @@
 		"android": "*",
 		"win": "2.206"
 	},
-	"repository": "https://github.com/relativemodder/newgrounds-proxy"
+	"repository": "https://github.com/relativemodder/newgrounds-proxy",
+	"issues": "https://discord.gg/xxPJpkAtBx"
 }
