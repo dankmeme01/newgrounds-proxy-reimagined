@@ -10,5 +10,7 @@
 		"win": "2.206"
 	},
 	"repository": "https://github.com/relativemodder/newgrounds-proxy",
-	"issues": "https://discord.gg/xxPJpkAtBx"
+	"issues": {
+		"url": "https://discord.gg/xxPJpkAtBx"
+	}
 }
