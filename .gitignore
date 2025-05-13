@@ -56,3 +56,6 @@ build-*/
 
 # Visual Studio
 .vs/
+
+server/target
+server/Cargo.lock

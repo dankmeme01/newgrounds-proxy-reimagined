@@ -1,46 +1,43 @@
 #include <Geode/Geode.hpp>
+#include <Geode/loader/Dispatch.hpp>
 
 using namespace geode::prelude;
 
-std::string str_replace(std::string haystack, std::string needle, std::string replacement)
-{
-	std::string input = std::string(haystack.c_str());
-    std::string replace_word = needle; 
-    std::string replace_by = replacement; 
+static std::string g_proxyUrl;
 
-    size_t pos = input.find(replace_word); 
+void proxySend(CCHttpClient* self, CCHttpRequest* req) {
+    constexpr std::string_view NG_DOMAIN = "audio.ngfiles.com";
 
-    while (pos != std::string::npos)
-    {
-        input.replace(pos, replace_word.size(), replace_by); 
+    std::string_view url = req->getUrl();
 
-        pos = input.find(replace_word, pos + replace_by.size()); 
+    auto domainBegin = url.find(NG_DOMAIN);
+    if (domainBegin == std::string::npos) {
+        return self->send(req);
     }
 
-	return input;
+    std::string newUrl = fmt::format("{}{}", g_proxyUrl, url.substr(domainBegin + NG_DOMAIN.size()));
+
+    log::debug("Redirecting {} to {}", url, newUrl);
+
+    req->setUrl(newUrl.c_str());
+    self->send(req);
 }
 
+$execute {
+    g_proxyUrl = Mod::get()->getSettingValue<std::string>("url");
+    if (g_proxyUrl.empty()) {
+        g_proxyUrl = "https://ngproxy.dankmeme.dev";
+    }
 
-void proxySend(CCHttpClient* self, CCHttpRequest* req)
-{
-	auto new_request_url = std::string(req->getUrl());
-	new_request_url = str_replace(new_request_url, "audio.ngfiles.com", "newgrounds.auby.pro");
-	new_request_url = str_replace(new_request_url, "http://", "https://");
+    listenForSettingChanges("url", [](std::string url) {
+        g_proxyUrl = url;
+    });
 
-	req->setUrl(new_request_url.c_str());
-
-	self->send(req);
-}
-
-
-$execute
-{
-    Mod::get()->hook(
+    (void) Mod::get()->hook(
         reinterpret_cast<void*>(
 			geode::addresser::getNonVirtual(&cocos2d::extension::CCHttpClient::send)
         ),
         &proxySend,
-        "cocos2d::extension::CCHttpClient::send",
-        tulip::hook::TulipConvention::Thiscall
+        "cocos2d::extension::CCHttpClient::send"
     );
 }

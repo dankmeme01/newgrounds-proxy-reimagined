@@ -1,0 +1,13 @@
+[package]
+name = "ngpr-server"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+colored = "3.0.0"
+log = "0.4.27"
+moka = { version = "0.12.10", features = ["future"] }
+reqwest = "0.12.15"
+rocket = "0.5.1"
+tempfile = "3.20.0"
+time = { version = "0.3.41", features = ["formatting"] }

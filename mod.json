@@ -1,18 +1,28 @@
 {
-	"geode": "3.0.0-beta.1",
+	"geode": "4.4.0",
 	"version": "v2.1.3",
-	"id": "relative.newgrounds_proxy",
-	"name": "Newgrounds Proxy",
-	"developer": "relative",
-	"description": "Tries to apply Cloudflare's cache while downloading songs from Newgrounds via self-hosted server.",
+	"id": "dankmeme.newgrounds-proxy-reimagined",
+	"name": "Newgrounds Proxy Reimagined",
+	"developers": [
+		"dankmeme",
+		"relative"
+	],
+	"description": "Uses Cloudflare (and a custom server) to cache songs from Newgrounds",
 	"gd": {
 		"android": "*",
-		"win": "2.206",
-		"mac": "2.206"
+		"win": "2.2074",
+		"mac": "2.2074",
+		"ios": "2.2074"
 	},
-	"repository": "https://github.com/relativemodder/newgrounds-proxy",
-	"issues": {
-		"info": "discord",
-		"url": "https://discord.gg/xxPJpkAtBx"
+	"links": {
+		"source": "https://github.com/dankmeme01/newgrounds-proxy-reimagined"
+	},
+	"settings": {
+		"url": {
+			"name": "Proxy URL",
+			"type": "string",
+			"default": "",
+			"filter": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890:/-_?.=+~!@#$%^&*()[]|{}\\';.,\"<>"
+		}
 	}
 }
