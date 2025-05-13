@@ -1,12 +1,9 @@
-use log::info;
 use moka::future::Cache;
+use rocket::{data::ToByteUnit, get, launch, routes};
 use std::{path::PathBuf, sync::Arc};
 
 mod logger;
 use logger::*;
-
-#[macro_use]
-extern crate rocket;
 
 struct State {
     cache: Cache<String, Arc<[u8]>>,
@@ -48,7 +45,16 @@ impl State {
         let bytes = resp.bytes().await.map_err(|e| e.to_string())?;
         let data = bytes.to_vec();
 
-        info!("Downloaded {}, saving to cache", filename_from_url(&url));
+        if data.len() > 32.megabytes() {
+            warn!(
+                "Downloaded big file ({} bytes), it will not be cached in RAM!",
+                data.len()
+            );
+
+            return Ok(Arc::<[u8]>::from(data.into_boxed_slice()));
+        } else {
+            info!("Downloaded {}, saving to cache", filename_from_url(&url));
+        }
 
         self.create_with_data(url, data)
             .await
