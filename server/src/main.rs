@@ -1,19 +1,44 @@
 use moka::future::Cache;
-use rocket::{data::ToByteUnit, get, launch, routes};
-use std::{path::PathBuf, sync::Arc};
+use rocket::{
+    Request, Response,
+    data::ToByteUnit,
+    get,
+    http::{ContentType, Status},
+    launch,
+    response::Responder,
+    routes,
+};
+use std::{io::Cursor, ops::Deref, path::PathBuf, sync::Arc};
 
 mod logger;
 use logger::*;
 
+#[derive(Clone, Debug)]
+struct SongArc(pub Arc<[u8]>);
+
+impl Deref for SongArc {
+    type Target = [u8];
+
+    fn deref(&self) -> &Self::Target {
+        self.0.as_ref()
+    }
+}
+
+impl AsRef<[u8]> for SongArc {
+    fn as_ref(&self) -> &[u8] {
+        self.0.as_ref()
+    }
+}
+
 struct State {
-    cache: Cache<String, Arc<[u8]>>,
+    cache: Cache<String, SongArc>,
     client: reqwest::Client,
 }
 
 impl State {
     pub fn new() -> Self {
         Self {
-            cache: Cache::new(128),
+            cache: Cache::builder().max_capacity(128).build(),
 
             client: reqwest::ClientBuilder::new()
                 .user_agent("ng-proxy/v1.0.0")
@@ -22,19 +47,19 @@ impl State {
         }
     }
 
-    pub async fn get_by_url(&self, url: &str) -> Option<Arc<[u8]>> {
+    pub async fn get_by_url(&self, url: &str) -> Option<SongArc> {
         self.cache.get(url).await
     }
 
-    pub async fn create_with_data(&self, url: String, data: Vec<u8>) -> std::io::Result<Arc<[u8]>> {
-        let value = Arc::<[u8]>::from(data.into_boxed_slice());
+    pub async fn create_with_data(&self, url: String, data: Vec<u8>) -> std::io::Result<SongArc> {
+        let value = SongArc(Arc::<[u8]>::from(data.into_boxed_slice()));
 
         self.cache.insert(url, value.clone()).await;
 
         Ok(value)
     }
 
-    pub async fn download_and_cache(&self, url: String) -> Result<Arc<[u8]>, String> {
+    pub async fn download_and_cache(&self, url: String) -> Result<SongArc, String> {
         let resp = self
             .client
             .get(&url)
@@ -53,7 +78,7 @@ impl State {
                 data.len()
             );
 
-            return Ok(Arc::<[u8]>::from(data.into_boxed_slice()));
+            return Ok(SongArc(Arc::<[u8]>::from(data.into_boxed_slice())));
         } else {
             info!("Downloaded {}, saving to cache", filename_from_url(&url));
         }
@@ -75,19 +100,45 @@ fn filename_from_url(url: &str) -> &str {
     }
 }
 
+struct SongResponse(SongArc);
+
+impl SongResponse {
+    pub fn new(data: SongArc) -> Self {
+        Self(data)
+    }
+}
+
+#[rocket::async_trait]
+impl<'r> Responder<'r, 'static> for SongResponse {
+    fn respond_to(self, _: &'r Request<'_>) -> rocket::response::Result<'static> {
+        Response::build()
+            .header(ContentType::MP3)
+            .sized_body(self.0.len(), Cursor::new(self.0))
+            .ok()
+    }
+}
+
+#[get("/")]
+async fn index() -> Status {
+    Status::NotFound
+}
+
+#[get("/favicon.ico")]
+async fn favicon() -> Status {
+    Status::NotFound
+}
+
 #[get("/<path..>")]
-async fn forwarder(path: PathBuf, state: &rocket::State<State>) -> Result<Arc<[u8]>, String> {
+async fn forwarder(path: PathBuf, state: &rocket::State<State>) -> Result<SongResponse, String> {
     let full_url = format!("https://audio.ngfiles.com/{}", path.display());
+    let filename = filename_from_url(&full_url);
 
     if let Some(file) = state.get_by_url(&full_url).await {
-        info!("Cache hit for {}", filename_from_url(&full_url));
-        Ok(file)
+        info!("Cache hit for {}", filename);
+        Ok(SongResponse::new(file))
     } else {
-        info!(
-            "Cache miss for {}, downloading",
-            filename_from_url(&full_url)
-        );
-        Ok(state.download_and_cache(full_url).await?)
+        info!("Cache miss for {}, downloading", filename);
+        Ok(SongResponse::new(state.download_and_cache(full_url).await?))
     }
 }
 
@@ -102,6 +153,6 @@ fn rocket() -> _ {
     );
 
     rocket::build()
-        .mount("/", routes![forwarder])
+        .mount("/", routes![index, favicon, forwarder])
         .manage(State::new())
 }
