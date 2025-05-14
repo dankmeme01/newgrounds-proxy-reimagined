@@ -96,6 +96,11 @@ fn rocket() -> _ {
     log::set_logger(Logger::instance()).expect("Failed to set logger");
     log::set_max_level(LogLevelFilter::Info);
 
+    info!(
+        "Running ngproxy server version {}",
+        env!("CARGO_PKG_VERSION")
+    );
+
     rocket::build()
         .mount("/", routes![forwarder])
         .manage(State::new())
