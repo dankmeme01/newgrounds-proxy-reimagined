@@ -31,6 +31,9 @@ $execute {
 
     listenForSettingChanges("url", [](std::string url) {
         g_proxyUrl = url;
+        if (g_proxyUrl.empty()) {
+            g_proxyUrl = "https://ngproxy.dankmeme.dev";
+        }
     });
 
     (void) Mod::get()->hook(
