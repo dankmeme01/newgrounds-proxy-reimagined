@@ -42,6 +42,8 @@ impl State {
             .await
             .map_err(|e| e.to_string())?;
 
+        let resp = resp.error_for_status().map_err(|s| s.to_string())?;
+
         let bytes = resp.bytes().await.map_err(|e| e.to_string())?;
         let data = bytes.to_vec();
 
