@@ -129,7 +129,7 @@ async fn favicon() -> Status {
 }
 
 #[get("/<path..>")]
-async fn forwarder(path: PathBuf, state: &rocket::State<State>) -> Result<SongResponse, String> {
+async fn forwarder(path: PathBuf, state: &rocket::State<State>) -> Result<SongResponse, Status> {
     let full_url = format!("https://audio.ngfiles.com/{}", path.display());
     let filename = filename_from_url(&full_url);
 
@@ -138,7 +138,17 @@ async fn forwarder(path: PathBuf, state: &rocket::State<State>) -> Result<SongRe
         Ok(SongResponse::new(file))
     } else {
         info!("Cache miss for {}, downloading", filename);
-        Ok(SongResponse::new(state.download_and_cache(full_url).await?))
+        let filename = filename.to_owned();
+
+        let file = match state.download_and_cache(full_url).await {
+            Ok(x) => x,
+            Err(err) => {
+                warn!("Error fetching filename '{filename}': {err}");
+                return Err(Status::InternalServerError);
+            }
+        };
+
+        Ok(SongResponse::new(file))
     }
 }
 
