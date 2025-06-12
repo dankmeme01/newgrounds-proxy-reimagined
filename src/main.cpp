@@ -26,13 +26,13 @@ void proxySend(CCHttpClient* self, CCHttpRequest* req) {
 $execute {
     g_proxyUrl = Mod::get()->getSettingValue<std::string>("url");
     if (g_proxyUrl.empty()) {
-        g_proxyUrl = "https://ngproxy.dankmeme.dev";
+        g_proxyUrl = "https://yxorpgn.globed.dev";
     }
 
     listenForSettingChanges("url", [](std::string url) {
         g_proxyUrl = url;
         if (g_proxyUrl.empty()) {
-            g_proxyUrl = "https://ngproxy.dankmeme.dev";
+            g_proxyUrl = "https://yxorpgn.globed.dev";
         }
     });
 
