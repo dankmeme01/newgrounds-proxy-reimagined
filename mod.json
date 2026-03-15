@@ -1,6 +1,6 @@
 {
-	"geode": "4.5.0",
-	"version": "v1.0.2",
+	"geode": "5.3.0",
+	"version": "v1.0.3",
 	"id": "dankmeme.newgrounds-proxy-reimagined",
 	"name": "Newgrounds Proxy Reimagined",
 	"developers": [
@@ -10,9 +10,9 @@
 	"description": "Uses Cloudflare (and a custom server) to cache songs from Newgrounds",
 	"gd": {
 		"android": "*",
-		"win": "2.2074",
-		"mac": "2.2074",
-		"ios": "2.2074"
+		"win": "2.2081",
+		"mac": "2.2081",
+		"ios": "2.2081"
 	},
 	"links": {
 		"source": "https://github.com/dankmeme01/newgrounds-proxy-reimagined"

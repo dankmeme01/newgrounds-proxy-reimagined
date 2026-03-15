@@ -55,7 +55,7 @@ $execute {
         g_proxyUrl = "https://ngproxy.dankmeme.dev";
     }
 
-    listenForSettingChanges("url", [](std::string url) {
+    listenForSettingChanges<std::string>("url", [](std::string url) {
         g_proxyUrl = url;
         if (g_proxyUrl.empty()) {
             g_proxyUrl = "https://ngproxy.dankmeme.dev";
