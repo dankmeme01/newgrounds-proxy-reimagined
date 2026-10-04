@@ -50,7 +50,7 @@ jobs:
 
     steps:
       - name: Combine builds
-        uses: geode-sdk/build-geode-mod/combine@combine-fixes
+        uses: geode-sdk/build-geode-mod/combine@main
         id: build
 
       - name: Upload build artifact
